@@ -8,10 +8,20 @@ git pull
     - Don't understand yet
 git push
     - Don't understand yet
+Note for u <remote> <branch>:
+    - No clue what to add yet
 git merge
     - Take main and your branch and create a new commit including both main and your branch
 git rebase
     - Copy all of the contents on your branch and put them all together into main, removing the branch
 git fetch
     - Don't understand yet
-
+git  add
+    - Don't understand yet
+git status
+    - Don't understand yet
+git log
+    - Don't understand yet
+git diff
+    - Provides a summary of all updates done
+EOF
