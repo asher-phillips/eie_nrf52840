@@ -1,0 +1,17 @@
+git commit
+    - Commit all of your changes to the whole thing
+git branch
+    - Name an offshoot to make changes seperate from the main stream of updates
+git checkout
+    - Select which branch you want to be working on
+git pull
+    - Don't understand yet
+git push
+    - Don't understand yet
+git merge
+    - Take main and your branch and create a new commit including both main and your branch
+git rebase
+    - Copy all of the contents on your branch and put them all together into main, removing the branch
+git fetch
+    - Don't understand yet
+
