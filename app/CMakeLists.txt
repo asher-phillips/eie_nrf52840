@@ -14,3 +14,5 @@ zephyr_include_directories(src)
 target_sources(app PRIVATE src/main.c)
 
 target_sources(app PRIVATE src/UploadtoScreen.c)
+
+target_sources(app PRIVATE src/game_sm.c)
