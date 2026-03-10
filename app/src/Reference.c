@@ -36,7 +36,15 @@ while(1) {
   return 0;
 */
 
-/*---------If you want to clear the screen
+/*---------If you want to clear the screen :)
     lv_obj_clean(lv_screen_active()); //Clear the screen
 */
 
+/*---------If you want to colour a button or text :)
+lv_obj_set_style_bg_color(ui_btn, lv_color_hex(0xFF0000), LV_STATE_DEFAULT);  // red
+lv_obj_set_style_bg_color(ui_btn, lv_color_hex(0x00FF00), LV_STATE_DEFAULT);  // green
+lv_obj_set_style_bg_color(ui_btn, lv_color_hex(0x0000FF), LV_STATE_DEFAULT);  // blue
+
+lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);  // white text
+
+*/
