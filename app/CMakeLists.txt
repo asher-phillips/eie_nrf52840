@@ -15,4 +15,21 @@ target_sources(app PRIVATE src/main.c)
 
 target_sources(app PRIVATE src/UploadtoScreen.c)
 
+#Runes
+target_sources(app PRIVATE src/BlueRune.c)
+target_sources(app PRIVATE src/GreenRune.c)
+target_sources(app PRIVATE src/PurpleRune.c)
+target_sources(app PRIVATE src/RedRune.c)
+
+#Hearts
+target_sources(app PRIVATE src/HeartRune.c)
+target_sources(app PRIVATE src/GreyHeartRune.c)
+target_sources(app PRIVATE src/ThreeHeartsRune.c)
+target_sources(app PRIVATE src/TwoHeartsRune.c)
+target_sources(app PRIVATE src/OneHeartRune.c)
+target_sources(app PRIVATE src/ZeroHeartRune.c)
+
+#Title
+target_sources(app PRIVATE src/RuneTitle.c)
+
 target_sources(app PRIVATE src/game_sm.c)

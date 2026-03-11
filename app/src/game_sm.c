@@ -19,8 +19,34 @@ typedef enum {
 } rune_t;
 
 int lives = 3;
+int points = 0;
+int high_score = 0;
+int heart_x = 0;
+int heart_y = 0;
+int heart_update = 0;
+int game_over = 0;
 rune_t current_rune = RUNE1;
 rune_t displayed_rune = RUNE1;
+
+
+/*--------------------------------------------------------------------IMAGES---------------------------------------------------------------------*/
+//Runes
+extern const lv_image_dsc_t BlueRune;
+extern const lv_image_dsc_t GreenRune;
+extern const lv_image_dsc_t PurpleRune;
+extern const lv_image_dsc_t RedRune;
+
+//Hearts
+extern const lv_image_dsc_t HeartRune;
+extern const lv_image_dsc_t GreyHeartRune;
+extern const lv_image_dsc_t ThreeHeartsRune;
+extern const lv_image_dsc_t TwoHeartsRune;
+extern const lv_image_dsc_t OneHeartRune;
+extern const lv_image_dsc_t ZeroHeartRune;
+
+//Title
+extern const lv_image_dsc_t RuneTitle;
+
 
 /*----------------------------------------------------------------STATE FUNCTIONS----------------------------------------------------------------*/
 static void mm_entry(void *o);
@@ -35,6 +61,7 @@ static void button(lv_align_t AS, int x, int y, const char *name, lv_event_cb_t 
 static void clear(void);
 static void next_rune(void);
 static lv_obj_t* label(const char *name, lv_align_t AS, int x, int y, uint32_t colour);
+static lv_obj_t* image(lv_align_t AS, const lv_image_dsc_t *src, int x, int y);
 
 /*----------------------------------------------------------------DEFINE STATES-------------------------------------------------------------------*/
 //Takes in entry, run, exit, parent and initial
@@ -72,40 +99,40 @@ static void retry_cb() {
 
 static void rune1_cb(lv_event_t *e) {
     if(displayed_rune == RUNE1) {
+        points++;
         next_rune();
     }
     else {
-        label("WRONG!", LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
         next_rune();
         lives -= 1;
     }
 }
 static void rune2_cb(lv_event_t *e) {
     if(displayed_rune == RUNE2) {
+        points++;
         next_rune();
     }
     else {
-        label("WRONG!", LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
         next_rune();
         lives -= 1;
     }
 }
 static void rune3_cb(lv_event_t *e) {
     if(displayed_rune == RUNE3) {
+        points++;
         next_rune();
     }
     else {
-        label("WRONG!", LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
         next_rune();
         lives -= 1;
     }
 }
 static void rune4_cb(lv_event_t *e) {
     if(displayed_rune == RUNE4) {
+        points++;
         next_rune();
     }
     else {
-        label("WRONG!", LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
         next_rune();
         lives -= 1;
     }
@@ -118,9 +145,15 @@ static void mm_entry(void *o) {
 
     //Clear
     clear();
+
+    //Title Card
+    ctx.title_card = image(LV_ALIGN_CENTER, &RuneTitle, 0, -20);
+
+    //Name
+    label("By Asher :)", LV_ALIGN_CENTER, 0, 10, 0x000000);
     
     //Create the button
-    button(LV_ALIGN_CENTER, 0, 0, "START", start_cb, 0x00FF00);
+    button(LV_ALIGN_CENTER, 0, 40, "START", start_cb, 0x00FF00);
 }
 
 static enum smf_state_result mm_run(void *o) {
@@ -138,18 +171,25 @@ static void gp_entry(void *o) {
     //Clear the screen
     clear();
 
-    //Create gameplay label
-    label("RUNE!", LV_ALIGN_TOP_MID, 0, 0, 0x000000);
+    //Create title image
+    ctx.title_image = image(LV_ALIGN_TOP_MID, &RuneTitle, 0, 0);
 
     //Start the clock
     ctx.song_start_ms = k_uptime_get_32();  
 
     current_rune = sys_rand32_get() % 4;
 
-    button(LV_ALIGN_TOP_LEFT, 0, 0, "RUNE1", rune1_cb, 0x00FF00);
-    button(LV_ALIGN_TOP_RIGHT, 0, 0, "RUNE2", rune2_cb, 0x00FF00);
-    button(LV_ALIGN_BOTTOM_LEFT, 0, 0, "RUNE3", rune3_cb, 0x00FF00);
-    button(LV_ALIGN_BOTTOM_RIGHT, 0, 0, "RUNE4", rune4_cb, 0x00FF00);
+    button(LV_ALIGN_TOP_LEFT, 5, 5, "             ", rune1_cb, 0x2596BE);
+    button(LV_ALIGN_TOP_RIGHT, -5, 5, "             ", rune2_cb, 0x634E77);
+    button(LV_ALIGN_BOTTOM_LEFT, 5, -5, "             ", rune3_cb, 0xA74D56);
+    button(LV_ALIGN_BOTTOM_RIGHT, -5, -5, "             ", rune4_cb, 0x076438);
+
+    points = 0;
+    heart_update = 0;
+    lives = 3;
+
+    //Starting Points
+    ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &ThreeHeartsRune, heart_x, heart_y);
 }
 
 static enum smf_state_result gp_run(void *o) {
@@ -164,29 +204,49 @@ static enum smf_state_result gp_run(void *o) {
     }*/
     if(current_rune == RUNE1) {
         displayed_rune = RUNE1;
-        ctx.rune_label = label("RUNE1", LV_ALIGN_CENTER, 0, 0, 0x000000);
+        ctx.rune_image = image(LV_ALIGN_CENTER, &BlueRune, 0, 0);
         current_rune = NEXT;
     }
     if(current_rune == RUNE2) {
         displayed_rune = RUNE2;
-        ctx.rune_label = label("RUNE2", LV_ALIGN_CENTER, 0, 0, 0x000000);
+        ctx.rune_image = image(LV_ALIGN_CENTER, &PurpleRune, 0, 0);
         current_rune = NEXT;
     }
     if(current_rune == RUNE3) {
         displayed_rune = RUNE3;
-        ctx.rune_label = label("RUNE3", LV_ALIGN_CENTER, 0, 0, 0x000000);
+        ctx.rune_image = image(LV_ALIGN_CENTER, &RedRune, 0, 0);
         current_rune = NEXT;
     }
     if(current_rune == RUNE4) {
         displayed_rune = RUNE4;
-        ctx.rune_label = label("RUNE4", LV_ALIGN_CENTER, 0, 0, 0x000000);
+        ctx.rune_image = image(LV_ALIGN_CENTER, &GreenRune, 0, 0);
         current_rune = NEXT;
     }
-    if (lives == 0)
+    if(lives == 2 && heart_update != 1) {
+        lv_obj_del(ctx.hearts);
+        ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &TwoHeartsRune, heart_x, heart_y);
+        heart_update = 1;
+    }
+    else if(lives == 1 && heart_update != 2) {
+        lv_obj_del(ctx.hearts);
+        ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &OneHeartRune, heart_x, heart_y);
+        heart_update = 2;
+    }
+    else if(lives == 0 && game_over == 0)
     {
+        lv_obj_del(ctx.hearts);
+        lv_obj_del(ctx.rune_image);
+        ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &ZeroHeartRune, heart_x, heart_y);
+        if(points > high_score) {
+            high_score = points;
+        }
+        game_over = 1;
+    }
+    else if(game_over == 1) {
+        k_msleep(1000);
         smf_set_state(SMF_CTX(&ctx), &states[STATE_S]);
-        lives = 3;
-    }   
+        game_over = 0;
+    }
     return SMF_EVENT_HANDLED;
 }
 
@@ -206,6 +266,11 @@ static void s_entry(void *o) {
 
     //Create retry button
     button(LV_ALIGN_CENTER, 50, -20, "Retry", retry_cb, 0x00FF00);
+
+    //Score
+    char points_str[10];
+    snprintf(points_str, 10, "%d", points);
+    label(points_str, LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
 }
 
 static enum smf_state_result s_run(void *o) {
@@ -236,13 +301,21 @@ static lv_obj_t* label(const char *name, lv_align_t AS, int x, int y, uint32_t c
     return label;
 }
 
+//Create an image
+static lv_obj_t* image(lv_align_t AS, const lv_image_dsc_t *src, int x, int y) {
+    lv_obj_t *img = lv_image_create(lv_screen_active());
+    lv_image_set_src(img, src);
+    lv_obj_align(img, AS, x, y);
+    return img;
+}
+
 //Clear Screen :)
 static void clear(void) {
     lv_obj_clean(lv_screen_active()); 
 }
 
 static void next_rune(void) {
-    lv_obj_del(ctx.rune_label);
+    lv_obj_del(ctx.rune_image);
     current_rune = sys_rand32_get() % 4;
 }
 
@@ -272,17 +345,16 @@ lost one.
 
 ---------------------------------PLAN---------------------------------
 Base Functionality
-1. Draw out symbols
-2. Figure out how to randomly pick a symbol
-3. Detect whether they picked the right one or not
-4. If they get it right give them a point, if not lose a life
-5. If lives go to zero go to end screen
-6. Display final score and keep the retry and main menu buttons
+1. Draw out symbols and lives and add them + 
+2. Figure out how to randomly pick a symbol +
+3. Detect whether they picked the right one or not +
+4. If they get it right give them a point, if not lose a life +
+5. If lives go to zero go to end screen +
+6. Display final score and keep the retry and main menu buttons + 
 
 Additional
 1. Figure out bomb timer
 2. Figure out how to get the timer to go back up
 3. Figure out how to display bomb
-4. Lose three lives if you run out of bomb time
-5. Add timing for points
+4. Lose remaining if you run out of bomb time
 */
