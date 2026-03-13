@@ -25,6 +25,8 @@ int heart_x = 0;
 int heart_y = 0;
 int heart_update = 0;
 int game_over = 0;
+int countdown = 0;
+int last_countdown = 30;
 rune_t current_rune = RUNE1;
 rune_t displayed_rune = RUNE1;
 
@@ -46,6 +48,11 @@ extern const lv_image_dsc_t ZeroHeartRune;
 
 //Title
 extern const lv_image_dsc_t RuneTitle;
+
+//EndScreen
+extern const lv_image_dsc_t GameOverRune;
+extern const lv_image_dsc_t ScoreRune;
+extern const lv_image_dsc_t HighScoreRune;
 
 
 /*----------------------------------------------------------------STATE FUNCTIONS----------------------------------------------------------------*/
@@ -188,6 +195,9 @@ static void gp_entry(void *o) {
     heart_update = 0;
     lives = 3;
 
+    last_countdown = 30;
+    ctx.timer_label = label("30", LV_ALIGN_RIGHT_MID, -20, 0, 0x000000);
+
     //Starting Points
     ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &ThreeHeartsRune, heart_x, heart_y);
 }
@@ -198,10 +208,15 @@ static enum smf_state_result gp_run(void *o) {
     //Eventually check whether the person got it right
 
     uint32_t elapsed = k_uptime_get_32() - ctx.song_start_ms;
-    /*
-    if(elapsed >= 5 * ONE_SECOND) {
-        smf_set_state(SMF_CTX(&ctx), &states[STATE_S]);
-    }*/
+
+    countdown = 30 - (elapsed / ONE_SECOND);
+    if(countdown != last_countdown) {
+        char time_str[10];
+        snprintf(time_str, 10, "%d", countdown);
+        lv_label_set_text(ctx.timer_label, time_str);
+        last_countdown = countdown;
+    }
+
     if(current_rune == RUNE1) {
         displayed_rune = RUNE1;
         ctx.rune_image = image(LV_ALIGN_CENTER, &BlueRune, 0, 0);
@@ -222,6 +237,12 @@ static enum smf_state_result gp_run(void *o) {
         ctx.rune_image = image(LV_ALIGN_CENTER, &GreenRune, 0, 0);
         current_rune = NEXT;
     }
+    if(game_over == 1) {
+        //k_msleep(1000);
+        smf_set_state(SMF_CTX(&ctx), &states[STATE_S]);
+        game_over = 0;
+        return SMF_EVENT_HANDLED;
+    }
     if(lives == 2 && heart_update != 1) {
         lv_obj_del(ctx.hearts);
         ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &TwoHeartsRune, heart_x, heart_y);
@@ -232,7 +253,7 @@ static enum smf_state_result gp_run(void *o) {
         ctx.hearts = image(LV_ALIGN_BOTTOM_MID, &OneHeartRune, heart_x, heart_y);
         heart_update = 2;
     }
-    else if(lives == 0 && game_over == 0)
+    else if((lives == 0 && game_over == 0))
     {
         lv_obj_del(ctx.hearts);
         lv_obj_del(ctx.rune_image);
@@ -242,10 +263,11 @@ static enum smf_state_result gp_run(void *o) {
         }
         game_over = 1;
     }
-    else if(game_over == 1) {
-        k_msleep(1000);
-        smf_set_state(SMF_CTX(&ctx), &states[STATE_S]);
-        game_over = 0;
+    if (elapsed >= 30 * ONE_SECOND) {
+        if(points > high_score) {
+            high_score = points;
+        }
+        game_over = 1;
     }
     return SMF_EVENT_HANDLED;
 }
@@ -258,19 +280,26 @@ static void s_entry(void *o) {
     //Clear
     clear(); 
 
-    //Game over label
-    label("GAME OVER", LV_ALIGN_TOP_MID, 0, 0, 0x000000);
+    //Game over image
+    image(LV_ALIGN_TOP_MID, &GameOverRune, 0, 20);
+
+    //High score image + score
+    image(LV_ALIGN_LEFT_MID, &HighScoreRune, 30, 0);
+    char high_score_str[10];
+    snprintf(high_score_str, 10, "%d", high_score);
+    label(high_score_str, LV_ALIGN_LEFT_MID, 65, 30, 0x000000);
+
+    //Score image + score
+    image(LV_ALIGN_RIGHT_MID, &ScoreRune, -30, 0);
+    char score_str[10];
+    snprintf(score_str, 10, "%d", points);
+    label(score_str, LV_ALIGN_RIGHT_MID, -62, 30, 0x000000);
 
     //Create main menu button
-    button(LV_ALIGN_CENTER, -50, -20, "Main Menu", back_to_menu_cb, 0x00FF00);
+    button(LV_ALIGN_BOTTOM_MID, -50, -20, "Main Menu", back_to_menu_cb, 0x00FF00);
 
     //Create retry button
-    button(LV_ALIGN_CENTER, 50, -20, "Retry", retry_cb, 0x00FF00);
-
-    //Score
-    char points_str[10];
-    snprintf(points_str, 10, "%d", points);
-    label(points_str, LV_ALIGN_BOTTOM_MID, 0, 0, 0x000000);
+    button(LV_ALIGN_BOTTOM_MID, 50, -20, "Retry", retry_cb, 0x00FF00);
 }
 
 static enum smf_state_result s_run(void *o) {

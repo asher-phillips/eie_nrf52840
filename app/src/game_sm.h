@@ -20,6 +20,7 @@ struct game_sm_ctx {
     lv_obj_t *title_image;
     lv_obj_t *hearts;
     lv_obj_t *title_card;
+    lv_obj_t *timer_label;
 };
 
 //Function declarations

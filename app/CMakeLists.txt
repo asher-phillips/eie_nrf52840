@@ -33,3 +33,8 @@ target_sources(app PRIVATE src/ZeroHeartRune.c)
 target_sources(app PRIVATE src/RuneTitle.c)
 
 target_sources(app PRIVATE src/game_sm.c)
+
+#End card
+target_sources(app PRIVATE src/GameOverRune)
+target_sources(app PRIVATE src/HighScoreRune)
+target_sources(app PRIVATE src/ScoreRune)
